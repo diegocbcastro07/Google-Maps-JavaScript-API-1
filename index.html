@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Region code biasing (US)</title>
+    <style>
+      html, body, #map-canvas {
+        height: 100%;
+        margin: 0px;
+        padding: 10px;
+        padding-bottom: 10px;
+      }
+      #panel {
+          position: absolute;
+          top: 5px;
+          left: 50%;
+          margin-left: -180px;
+          z-index: 5;
+          background-color: #fff;
+          padding: 5px;
+          border: 10px solid #999;
+      }
+       </style>
+      <style>
+      #directions-panel {
+              height: 100%;
+              float: right;
+              width: 390px;
+              overflow: auto;
+          }
+      #map-canvas {
+              margin-right: 400px;
+          }
+      #control {
+              background: #fff;
+              padding : 10px 10px 10px 10px;
+              font-size: 14px;
+              font-family: Arial;
+              border: 10px solid #ccc;
+              height: 200px;
+              width: 300px;
+              box-shadow: 0 2px 2px rgba(33, 33, 0.4);
+              display: none;
+          }
+      @media print {
+         #map-canvas {
+              height: 500px;
+              padding: 5px 5px;
+              margin-bottom: 10px;
+              }
+         #directions-panel {
+              float: none;
+              width: auto;
+              }
+          }   
+      </style>
+      <style>
+          #start {
+              margin-bottom: 10px;
+          }
+          #waypoints {
+              margin-bottom: 10px;
+          }
+         #optimize {
+              margin-top: 5px;
+              margin-bottom: 0px;
+          }
+          #submit {
+              float: right;
+          }
+      </style>
+      
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
+    <script>
+ var directionsDisplay;
+ var directionsService = new google.maps.DirectionsService();
+        
+ function initialize() {
+    directionsDisplay = new google.maps.DirectionsRenderer();
+    var mapOptions = {
+        zoom: 5, 
+        center: new google.maps.LatLng(41.850033, -87.6500523),
+        mapTypeControl: true,
+        mapTypeControlOptions: {
+            style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
+            position: google.maps.ControlPosition.BOTTOM_CENTER
+    },
+        panControl: true,
+        panControlOptions: {
+                position: google.maps.ControlPosition.RIGHT_CENTER
+            },
+        zoomControl: true,
+        zoomControlOptions: {
+            style: google.maps.ZoomControlStyle.LARGE,
+            position: google.maps.ControlPosition.LEFT_CENTER
+        },
+        scaleControl: true,
+        streetViewControl: true,
+        streetViewControlOptions: {
+        position: google.maps.ControlPosition.LEFT_CENTER
+        }
+    }
+    
+ var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+ directionsDisplay.setMap(map);
+ directionsDisplay.setPanel(document.getElementById('directions-panel'));
+    
+ var control = document.getElementById('control');
+ control.style.display = 'block';
+ map.controls[google.maps.ControlPosition.TOP_LEFT].push(control);
+}
+        
+function calcRoute() {
+    // Get start and end locations
+    var start = document.getElementById('start').value;
+    var end = document.getElementById('end').value;
+    var waypts = [];
+    var wayptsArray = document.getElementById('waypoints');
+    for (var i = 0; i < wayptsArray.length; i++) {
+        if (wayptsArray.options[i].selected == true) {
+            waypts.push ({
+                location: wayptsArray[i].value,
+                stopover:true});
+        }
+    }
+    
+    var doOptimize = document.getElementById('optimize').value === "true";
+    var request = {
+        origin: start,
+        destination: end,
+        waypoints: waypts,
+        optimizeWaypoints: doOptimize,
+        travelMode: google.maps.TravelMode.DRIVING
+    }; 
+    
+    directionsService.route(request, function(response, status) {
+        if(status == google.maps.DirectionsStatus.OK) {
+            directionsDisplay.setDirections(response);
+        }
+            
+    });
+}
+         
+
+google.maps.event.addDomListener(window, 'load', initialize);
+        
+    </script>
+  </head>
+  <body>
+      <div id="control">
+        <strong>Start:</strong>
+        <input id="start">
+            <option value="1455 Danner Drive, Aurora, Ohio">1455 Danner Drive, Aurora, Ohio</option>
+              <br>
+        <strong>Points:</strong><br>
+        <select multiple id="waypoints">
+            <option value="123 Maple Drive, Twinsburg, Ohio">123 Maple Drive, Twinsburg, Ohio</option>
+            <option value="225 Midway Drive, Kent, Ohio">225 Midway Drive, Kent, Ohio</option>
+            <option value="135 East Erie Street, Kent, Ohio">135 East Erie Street, Kent, Ohio</option>
+            <option value="773 Holborn Road, Streetsboro, Ohio">773 Holborn Road, Streetsboro, Ohio</option>
+            <option value="549 South Chillicothe Road, Aurora, Ohio">549 South Chillicothe Road, Aurora, Ohio</option>
+            <option value="126 College Street, Hudson, Ohio">126 College Street, Hudson, Ohio</option>
+            <option value="Kirby Lane, Streetsboro, Ohio">Kirby Lane, Streetsboro, Ohio</option>
+        </select>
+              <br> 
+        <strong>End:</strong>
+        <input id="end">
+            <option value="1455 Danner Drive, Aurora, Ohio">1455 Danner Drive, Aurora, Ohio</option>
+              <br>
+        <input type="checkbox" id="optimize" value="true">Optimize to find quickest route.
+          <br>
+        <input type="submit" id="submit" onclick="calcRoute();">
+    </div>
+      <div id="directions-panel"></div>
+      <div id="map-canvas"></div>
+  </body>
+</html>
